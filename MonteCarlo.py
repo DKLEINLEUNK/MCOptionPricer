@@ -39,7 +39,7 @@ class MonteCarlo:
         self.price_paths = None
 
 
-    def euler_scheme(self):
+    def simulate_paths(self):
         '''
         Description
         -----------

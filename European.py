@@ -10,7 +10,7 @@ class Put(MonteCarlo):
 
     def price_option(self):
         if self.price_paths is None:
-            self.euler_scheme()
+            self.simulate_paths()
         
         payoff = np.maximum(self.K - self.price_paths[-1], 0)
         price = np.exp(-self.r * self.T) * np.mean(payoff)
@@ -25,7 +25,7 @@ class Call(MonteCarlo):
 
     def price_option(self):
         if self.price_paths is None:
-            self.euler_scheme()
+            self.simulate_paths()
         
         payoff = np.maximum(self.price_paths[-1] - self.K, 0)
         price = np.exp(-self.r * self.T) * np.mean(payoff)
