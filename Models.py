@@ -1,8 +1,9 @@
+from abc import ABC, abstractmethod
+
 import numpy as np
 
 from utils import progress_bar, clear_progress_bar
 
-# TODO turn this into an abstract class
 
 class MonteCarlo:
 
@@ -49,11 +50,6 @@ class MonteCarlo:
         Description
         -----------
         Generates paths for the underlying asset price (default using Euler scheme).
-
-        Parameters
-        ----------
-        with_progress_bar : bool
-            If True, a progress bar will be displayed in the console.
         '''
         dt = self.T / self.time_steps
         Z = np.random.standard_normal((self.time_steps, self.simulations))
@@ -75,3 +71,39 @@ class MonteCarlo:
         Abstract method for option pricing, has to be overridden by subclasses.
         '''
         raise NotImplementedError('Subclass must implement abstract method.')
+
+
+class PathGenerator(ABC):
+    @abstractmethod
+    def simulate_paths(self, n_simulations, n_time_steps):
+        pass
+
+
+class BlackScholes(PathGenerator):
+
+    def __init__(self, asset_price, strike_price, maturity, riskfree_rate, volatility) -> None:
+        self.asset_price = asset_price
+        self.strike_price = strike_price
+        self.maturity = maturity
+        self.riskfree_rate = riskfree_rate
+        self.volatility = volatility
+    
+    def simulate_paths(self, n_simulations, n_time_steps):
+        pass
+
+
+class Heston(PathGenerator):
+
+    def __init__(self, asset_price, barrier, strike_price, maturity, riskfree_rate, longterm_variance, reversion_rate, vol_of_vol, correlation) -> None:
+        self.asset_price = asset_price
+        self.barrier = barrier
+        self.strike_price = strike_price
+        self.maturity = maturity
+        self.riskfree_rate = riskfree_rate
+        self.longterm_variance = longterm_variance
+        self.reversion_rate = reversion_rate
+        self.vol_of_vol = vol_of_vol
+        self.correlation = correlation
+    
+    def simulate_paths(self, n_simulations, n_time_steps):
+        pass

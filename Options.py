@@ -1,5 +1,5 @@
 import numpy as np
-from MonteCarlo import MonteCarlo
+from Models import MonteCarlo
 
 
 class EUPut(MonteCarlo):
@@ -30,6 +30,32 @@ class EUCall(MonteCarlo):
         payoff = np.maximum(self.price_paths[-1] - self.K, 0)
         price = np.exp(-self.r * self.T) * np.mean(payoff)
         return price
+
+
+class UpAndOutEUCall(MonteCarlo):
+
+    '''
+    A class for pricing European up-and-out call options using Monte Carlo simulation.
+
+    Uses Heston's stochastic volatility model implemented with Millstein scheme.
+    '''
+
+    def simulate_paths(self):
+        '''
+        Description
+        -----------
+        Generates paths for the underlying asset price using Millstein scheme.
+        '''
+
+
+    def price_option(self):
+        if self.price_paths is None:
+            self.simulate_paths()
+        
+        payoff = np.maximum(self.price_paths[-1] - self.K, 0)
+        price = np.exp(-self.r * self.T) * np.mean(payoff)
+        return price
+    
 
 
 if __name__ == '__main__':
