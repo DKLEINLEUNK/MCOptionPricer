@@ -2,7 +2,7 @@ import numpy as np
 from MonteCarlo import MonteCarlo
 
 
-class Put(MonteCarlo):
+class EUPut(MonteCarlo):
 
     '''
     A class for pricing European put options using Monte Carlo simulation.
@@ -17,7 +17,7 @@ class Put(MonteCarlo):
         return price
 
 
-class Call(MonteCarlo):
+class EUCall(MonteCarlo):
 
     '''
     A class for pricing European call options using Monte Carlo simulation.
@@ -35,7 +35,7 @@ class Call(MonteCarlo):
 if __name__ == '__main__':
 
     ### Example for a put option ###
-    put = Put(
+    put = EUPut(
         S0=100,
         K=99,
         T=1,
@@ -45,11 +45,11 @@ if __name__ == '__main__':
         time_steps=250
     )
     put.price_option()
-    print(f'European Put Option Price: {put.price_option()}')
+    print(f'Price for {put.name}: {put.price_option()}')
     
     
     ### Example for a call option ###
-    call = Call(
+    call = EUCall(
         S0=100,
         K=99,
         T=1,
@@ -59,4 +59,4 @@ if __name__ == '__main__':
         time_steps=250
     )
     call.price_option()
-    print(f'European Call Option Price: {call.price_option()}')
+    print(f'Price for {call.name}: {call.price_option()}')

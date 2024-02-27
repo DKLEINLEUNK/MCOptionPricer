@@ -39,11 +39,16 @@ class MonteCarlo:
         self.price_paths = None
 
 
+    @property
+    def name(self):
+        return self.__class__.__name__
+
+
     def simulate_paths(self):
         '''
         Description
         -----------
-        Generates paths for the underlying asset price using the Euler scheme.
+        Generates paths for the underlying asset price (default using Euler scheme).
 
         Parameters
         ----------
@@ -51,7 +56,7 @@ class MonteCarlo:
             If True, a progress bar will be displayed in the console.
         '''
         dt = self.T / self.time_steps
-        Z = np.random.standard_normal((self.time_steps, self.simulations))  # Brownian motion
+        Z = np.random.standard_normal((self.time_steps, self.simulations))
         S = np.zeros((self.time_steps + 1, self.simulations))  # +1 for initial price S0
         S[0] = self.S0
         

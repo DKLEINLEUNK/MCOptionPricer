@@ -1,16 +1,17 @@
 import argparse
 
-import European as eu
+from European import *
 from utils import cli_error_message
+from plotter import plot_option_prices
 
+def main(type, region, S0, K, T, r, sigma, simulations, time_steps, plot):
 
-def main(type, region, S0, K, T, r, sigma, simulations, time_steps):
     # create the option based on user input
     if region == 'eu':  # TODO remove option checks, implement better handling
         if type == 'put':
-            option = eu.Put(S0, K, T, r, sigma, simulations, time_steps)
+            option = EUPut(S0, K, T, r, sigma, simulations, time_steps)
         elif type == 'call':
-            option = eu.Call(S0, K, T, r, sigma, simulations, time_steps)
+            option = EUCall(S0, K, T, r, sigma, simulations, time_steps)
     else:
         raise ValueError("Invalid region: Only European options are supported.")
 
@@ -31,6 +32,7 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--volatility", type=float, default=0.2, help="Volatility")
     parser.add_argument("-n", "--simulations", type=int, default=10**4, help="Number of simulations")
     parser.add_argument("-t", "--time_steps", type=int, default=252, help="Number of time steps")
+    parser.add_argument("--plot", action="store_true", help="Plot option prices")
 
     # read command-line arguments
     args = parser.parse_args()
@@ -41,4 +43,4 @@ if __name__ == "__main__":
         print(error)
     else:
         main(args.type, args.region, args.asset_price, args.strike_price, args.maturity, 
-             args.rate, args.volatility, args.simulations, args.time_steps)
+             args.rate, args.volatility, args.simulations, args.time_steps, args.plot)
