@@ -1,6 +1,6 @@
 import argparse
 
-from European import *
+from Options import *
 from utils import cli_error_message
 from plotter import plot_option_prices
 
