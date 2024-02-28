@@ -1,5 +1,7 @@
 import sys
 
+import numpy as np
+
 
 def cli_error_message(args):
     '''

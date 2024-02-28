@@ -15,3 +15,7 @@ def plot_option_prices(models, **kwargs):
     plt.xticks(rotation=45)
     plt.tight_layout()
     plt.show()
+
+
+def plot_stock_paths():
+    pass
