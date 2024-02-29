@@ -10,7 +10,7 @@ class MonteCarlo:
     A base class encapsulating core Monte Carlo simulation logic.
     '''
 
-    def __init__(self, S0, K, T, r, sigma, simulations=10_000, time_steps=250):
+    def __init__(self, S0, K, T, r, sigma, simulations=10_000, time_steps=250, barrier = 0):
         '''
         Parameters
         ----------
@@ -36,7 +36,9 @@ class MonteCarlo:
         self.sigma = sigma
         self.simulations = simulations
         self.time_steps = time_steps
+        self.barrier = barrier
         self.price_paths = None
+        
 
 
     @property
@@ -56,13 +58,13 @@ class MonteCarlo:
             If True, a progress bar will be displayed in the console.
         '''
         dt = self.T / self.time_steps
-        Z = np.random.standard_normal((self.time_steps, self.simulations))
+        Z = np.random.standard_normal((self.time_steps, self.simulations)) #A matrix consisiting of random numbers
         S = np.zeros((self.time_steps + 1, self.simulations))  # +1 for initial price S0
-        S[0] = self.S0
+        S[0] = self.S0 #Initialises the entire first row of the S matrix to the starting stock price
         
         for t in range(1, self.time_steps + 1):
-            S[t] = S[t - 1] * np.exp((self.r - 0.5 * self.sigma**2) * dt + self.sigma * np.sqrt(dt) * Z[t - 1])
-            progress_bar(t / self.time_steps)
+            S[t] = S[t - 1] * np.exp((self.r - 0.5 * self.sigma**2) * dt + self.sigma * np.sqrt(dt) * Z[t - 1]) #For each row (each time step), calculate the next stock price for each simulation  
+            progress_bar(t / self.time_steps)                                                                   #We put the -1 in the Z index to ensure that we start from the 0'th row of the random matrix
         
         # TODO add a self.with_progress_bar attribute
         clear_progress_bar()
