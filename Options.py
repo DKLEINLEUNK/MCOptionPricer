@@ -46,7 +46,7 @@ class EuUpAndOutCall(MonteCarlo):
         if self.price_paths is None:
             self.simulate_paths()
          
-        cols_greater_than_barrier = np.any(self.price_paths > self.barrier, axis = 0) #Checks row by row if any column contains a stock price > B
+        cols_greater_than_barrier = np.any(self.price_paths >= self.barrier, axis = 0) #Checks row by row if any column contains a stock price >= B
         
         self.price_paths[-1,cols_greater_than_barrier] = 0 #Using boolean indexing. If any of the columns contained a S > B, the last element of that column will be set to 0 for the purpose of calculating the payoff of the barrier 
         
@@ -121,7 +121,7 @@ if __name__ == '__main__':
         sigma=0.2,
         simulations=10_000,
         time_steps=250,
-        barrier=140
+        barrier= 140
     )
 
     upAndOutCall.price_option()
