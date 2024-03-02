@@ -44,7 +44,7 @@ class EuUpAndOutCall(MonteCarlo):
     def price_option(self):
 
         if self.price_paths is None:
-            self.simulate_paths()
+            self.simulate_paths_heston() #Use the heston model for the price path (implemented with Millstein scheme)
          
         cols_greater_than_barrier = np.any(self.price_paths >= self.barrier, axis = 0) #Checks row by row if any column contains a stock price >= B
         
@@ -69,17 +69,17 @@ if __name__ == '__main__':
                    [5,0,1],
                    [1,2,3]])
     
-    print("BEFORE")
-    print(mat)
+    # print("BEFORE")
+    # print(mat)
     
-    contains_greater_than_10_in_columns = np.any(mat > 4, axis=0)
+    # contains_greater_than_10_in_columns = np.any(mat > 4, axis=0)
 
-    mat[-1, contains_greater_than_10_in_columns] = 0
+    # mat[-1, contains_greater_than_10_in_columns] = 0
 
-    print("AFTER")
-    print(mat)
+    # print("AFTER")
+    # print(mat)
 
-    print(contains_greater_than_10_in_columns)
+    # print(contains_greater_than_10_in_columns)
 
     #-----------------------------
     
@@ -111,17 +111,17 @@ if __name__ == '__main__':
         time_steps=250
     )
     call.price_option()
-    print(f'Price for {call.name}: {call.price_option()}')
+    #print(f'Price for {call.name}: {call.price_option()}')
 
     upAndOutCall = EuUpAndOutCall(
         S0=100,
-        K=99,
+        K=100,
         T=1,
         r=0.06,
         sigma=0.2,
         simulations=10_000,
         time_steps=250,
-        barrier= 140
+        barrier= 120
     )
 
     upAndOutCall.price_option()
