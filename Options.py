@@ -121,7 +121,13 @@ if __name__ == '__main__':
         sigma=0.2,
         simulations=10_000,
         time_steps=250,
-        barrier= 120
+        barrier = 120,
+        theta = 0.04,
+        kappa = 2, 
+        epsilon = 0.1,
+        rho = -0.7,
+        V0 = 0.10
+
     )
 
     upAndOutCall.price_option()

@@ -10,7 +10,7 @@ class MonteCarlo:
     A base class encapsulating core Monte Carlo simulation logic.
     '''
 
-    def __init__(self, S0, K, T, r, sigma, simulations=10_000, time_steps=250, barrier = 0):
+    def __init__(self, S0, K, T, r, sigma, simulations=10_000, time_steps=250, barrier = 0, theta = 0.0, kappa = 0, epsilon = 0.0, rho = 0.0, V0 = 0.0):
         '''
         Parameters
         ----------
@@ -28,7 +28,21 @@ class MonteCarlo:
             Number of simulations
         time_steps : int
             Time steps
+        barrier: int
+            Barrier for Eu up and out option
+        theta: float
+            Long term variance of Heston model
+        kappa: int
+            Mean reversion rate of Heston model
+        epsilon: float
+            Vol-of-vol of Heston model
+        rho: float:
+            Correlation of normally distributed variables used for the variance and stock price of the Heston model
+        V0: float:
+            Initial variance of Heston model
         '''
+
+        #General parameters
         self.S0 = S0
         self.K = K
         self.T = T
@@ -36,8 +50,21 @@ class MonteCarlo:
         self.sigma = sigma
         self.simulations = simulations
         self.time_steps = time_steps
+
+        #Parameters specific to Monte Carlo simulation using the Heston model instead of the Black Scholes model
         self.barrier = barrier
+        self.theta = theta
+        self.kappa = kappa
+        self.epsilon = epsilon
+        self.rho = rho
+        self.V0 = V0
+
+        #To be initialised later
         self.price_paths = None
+
+        
+
+
         
 
 
@@ -74,14 +101,16 @@ class MonteCarlo:
 
     def simulate_paths_heston(self):
 
-        """Generates paths for the underlying asset price according to the Heston model, implemented with the Millstein scheme"""
+        """
+
+        Description
+        -----------
+        Generates paths for the underlying asset price according to the Heston model, 
+        implemented with the Millstein scheme
         
-       
-        theta = 0.04 #Long term variance
-        kappa = 2 #Mean reversion rate
-        epsilon = 0.1 #Vol-of-vol
-        rho =  -0.7 #Correlation of Zv and Zs
-        V0 = 0.10 #Initial volatility
+        """
+    
+        # TODO Find the correct value for V0
 
         
         dt = self.T / self.time_steps
@@ -91,20 +120,20 @@ class MonteCarlo:
         Z2 = np.random.standard_normal((self.time_steps, self.simulations))
 
         Zv = Z1
-        Zs = (rho*Z1) + np.sqrt(1-(rho**2))*Z2
+        Zs = (self.rho*Z1) + np.sqrt(1-(self.rho**2))*Z2
 
         #Update variance 
 
         V = np.zeros((self.time_steps+1, self.simulations))   # +1 for initial variance V0
         S = np.zeros((self.time_steps+1, self.simulations))
 
-        V[0] = V0 #Set first row to initial volatility
+        V[0] = self.V0 #Set first row to initial volatility
         S[0] = self.S0 #Set first row to initial stock prices
 
         for t in range(1, self.time_steps + 1): #Start looping from the next row after the first row
             
             #Update variance
-            V[t] = V[t-1] + kappa*(theta - np.maximum(V[t-1],0))*dt + epsilon*np.sqrt(np.maximum(V[t-1],0)*dt)*Zv[t-1] + (1/4)*(epsilon**2)*dt*((Zv[t-1]**2) - 1)
+            V[t] = V[t-1] + self.kappa*(self.theta - np.maximum(V[t-1],0))*dt + self.epsilon*np.sqrt(np.maximum(V[t-1],0)*dt)*Zv[t-1] + (1/4)*(self.epsilon**2)*dt*((Zv[t-1]**2) - 1)
             
             #Update stock price (USED GEOMETRIC MODEL SO THAT IT IS CONSISTENT WITH THE OTHER GENERATE STOCK PATHS METHOD)
             S[t] =  S[t-1] * np.exp((self.r - (1/2)*np.maximum(V[t],0))*dt + np.sqrt(np.maximum(V[t],0)*dt)*Zs[t-1])
@@ -163,6 +192,12 @@ if __name__ == '__main__':
         sigma=0.2,
         simulations=5,
         time_steps=250,
+        barrier = 120,
+        theta = 0.04,
+        kappa = 2, 
+        epsilon = 0.1,
+        rho = -0.7,
+        V0 = 0.10 
      )
     
     carlo.simulate_paths_heston()
