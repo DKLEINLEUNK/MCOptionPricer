@@ -28,17 +28,17 @@ class MonteCarlo:
             Number of simulations
         time_steps : int
             Time steps
-        barrier: int
+        barrier : int
             Barrier for Eu up and out option
-        theta: float
+        theta : float
             Long term variance of Heston model
-        kappa: int
+        kappa : int
             Mean reversion rate of Heston model
-        epsilon: float
+        epsilon : float
             Vol-of-vol of Heston model
-        rho: float:
+        rho : float:
             Correlation of normally distributed variables used for the variance and stock price of the Heston model
-        V0: float:
+        V0 : float:
             Initial variance of Heston model
         '''
 
