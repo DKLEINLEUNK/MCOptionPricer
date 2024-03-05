@@ -15,6 +15,44 @@ class EUPut(MonteCarlo):
         payoff = np.maximum(self.K - self.price_paths[-1], 0)
         price = np.exp(-self.r * self.T) * np.mean(payoff)
         return price
+    
+    def compute_CI(self):
+
+        '''
+        Description
+        -----------
+        Computes the confidence intervals for the estimated option price 
+        '''
+
+        payoff = np.maximum(self.K - self.price_paths[-1], 0) 
+
+        discounted_payoffs = payoff * np.exp(-self.r * self.T) #Discount each payoff back to T0
+
+        price_estimate = np.mean(discounted_payoffs) #This is our estimate of the option's price
+
+        sd = np.std(discounted_payoffs, ddof= 1) #standard_deviation
+
+        RMSE = sd/np.sqrt(self.simulations) #Route Mean Squared Error
+
+        Z_95 = 1.96 #Z score of 95% CI
+
+        lower_95 = price_estimate - (Z_95 * RMSE/np.sqrt(self.simulations)) #Lower bound of 95% CI
+        upper_95 = price_estimate + (Z_95 * RMSE/np.sqrt(self.simulations)) #Upper bound of 95% CI
+
+        Z_99 = 2.576 #Z score of 95% CI
+
+        lower_99 = price_estimate - (Z_99 * RMSE/np.sqrt(self.simulations)) #Lower bound of 95% CI
+        upper_99 = price_estimate + (Z_99 * RMSE/np.sqrt(self.simulations)) #Upper bound of 95% CI
+
+
+
+
+        return lower_95, upper_95, lower_99, upper_99
+
+
+
+        
+
 
 
 
