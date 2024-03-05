@@ -1,8 +1,11 @@
 import sys
 
 import numpy as np
+from scipy.stats import norm
 
 
+# Command-line arguments
+#-----------------------
 def cli_error_message(args):
     '''
     Checks if all command-line arguments are valid.
@@ -28,6 +31,8 @@ def cli_error_message(args):
     return None
 
 
+# Progress bar
+#-------------
 def progress_bar(progress):
     bar_length = 50
     block = int(round(bar_length * progress))
@@ -40,3 +45,9 @@ def clear_progress_bar():
     sys.stdout.flush()
     sys.stdout.write(" " * 100 + "\r")
     sys.stdout.flush()
+
+
+# Option pricing
+#---------------
+def phi(x):
+    return norm.cdf(x)
