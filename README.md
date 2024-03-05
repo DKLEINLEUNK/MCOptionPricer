@@ -2,9 +2,16 @@
 A comprehensive library focused on the financial applications for Monte Carlo methods.
 
 ## Table of Content
+* [TODO](#todo)
 * [Instructions](#instructions)
 * [Installation](#installation)
 * [Project Structure](#structure)
+
+## TODO
+- [ ] Implement confidence intervals for the Monte Carlo class.
+- [ ] Standardize plotting protocol.
+- [ ] Fix the implementation of geometric average pricing.
+- [ ] Implement geometric average pricing as a control variate.
 
 ## Instructions
 ```bash
