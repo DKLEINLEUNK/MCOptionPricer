@@ -114,26 +114,89 @@ class Convergence:
         plt.show()
 
 
+    def strike_sensitivity():
+
+        """
+
+        Description
+        -----------
+        Determine sensitivity of the put option price to the strike price (K) 
+        
+        """
+
+        Ks = np.arange(10,310,10)
+        prices = []
+
+        for K in Ks:
+
+            put = EUPut(
+            S0=100,
+            K=K,
+            T=1,
+            r=0.06,
+            sigma=0.2,
+            simulations=10_000,
+            time_steps=250,
+        )
+            
+            price = put.price_option()
+            prices.append(price)
+        
+        
+
+        plt.plot(Ks, prices)
+        plt.xlabel("K")
+        plt.ylabel("Prices")
+        plt.show()
+    
+    def sigma_sensitivity():
+
+        """
+
+        Description
+        -----------
+        Determine sensitivity of the put option price to the volatility (sigma)
+        """
+
+        sigmas = np.arange(0,1.05,0.05)
+        prices = []
+
+        for sigma in sigmas:
+
+            put = EUPut(
+            S0=100,
+            K=99,
+            T=1,
+            r=0.06,
+            sigma=sigma,
+            simulations=10_000,
+            time_steps=250,
+        )
+            
+            price = put.price_option()
+            prices.append(price)
+        
+        
+
+        plt.plot(sigmas, prices)
+        plt.xlabel("$\\sigma$")
+        plt.ylabel("Prices")
+        plt.show()
+
+
+
+
+
 if __name__ == "__main__":
 
+    #TESTING implementation
+    #-----------------------------
    
     Convergence.convergence_to_black_scholes()
+    Convergence.strike_sensitivity()
+    Convergence.sigma_sensitivity()
 
-    # put = EUPut(
-    #            S0=100,
-    #             K=99,
-    #             T=1,
-    #             r=0.06,
-    #             sigma=0.2,
-    #             simulations= 100, #Vary number of trials
-    #             time_steps=250
-    #         )
-    
-    # price = put.price_option()
-    
-    # discounted_payoffs_sd = put.compute_payoff_standard_deviation()
-    # print("CI bounds:  ", discounted_payoffs_sd)
-    #print(discounted_payoffs)
-    
+
+    #-----------------------------
     
 
