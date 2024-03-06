@@ -94,8 +94,20 @@ class EuUpAndOutCall(MonteCarlo):
         return price
 
 
+class DigitalOption(MonteCarlo):
+    
+    '''
+    A class for pricing
+    '''
+    
+    def price_option(self):
+        if self.price_paths is None:
+            self.simulate_paths()
+        
+        payoff = self.price_paths[-1] >= self.barrier
+        price = np.exp(-self.r * self.T) * np.mean(payoff)
 
-
+        return price
 
 
 if __name__ == '__main__':
@@ -103,9 +115,9 @@ if __name__ == '__main__':
     #TESTING BARRIER LOGIC 
     #-----------------------------
 
-    mat = np.array([[1,2,1],
-                   [5,0,1],
-                   [1,2,3]])
+    # mat = np.array([[1,2,1],
+    #                [5,0,1],
+    #                [1,2,3]])
     
     # print("BEFORE")
     # print(mat)
@@ -168,14 +180,27 @@ if __name__ == '__main__':
 
     # )
 
+    # digital = DigitalOption(
+    #     S0=100,
+    #     K=99,
+    #     T=1,
+    #     r=0.06,
+    #     sigma=0.2,
+    #     simulations=10_000,
+    #     time_steps=252,
+    #     barrier = 60
+    # )
+    # print(f'Price of digital option: {digital.price_option()}')
+
     # upAndOutCall.price_option()
     # print(f'Price for {upAndOutCall.name}: {upAndOutCall.price_option()}')
 
     # S0, K, T, r, sigma,
-    from plotter import test_option_pricing
-    test_option_pricing(
-        EUCall,
-        strikes=np.linspace(50, 150, 20),  # Example strike prices range
-        sigmas=np.linspace(0.1, 0.5, 20),  # Example volatilities range
-        other_params={'S0': 100, 'T': 1, 'r': 0.06, 'simulations': 10_000, 'time_steps': 252}
-    )
+    # from plotter import test_option_pricing
+    # test_option_pricing(
+    #     EUCall,
+    #     strikes=np.linspace(50, 150, 20),  # Example strike prices range
+    #     sigmas=np.linspace(0.1, 0.5, 20),  # Example volatilities range
+    #     other_params={'S0': 100, 'T': 1, 'r': 0.06, 'simulations': 10_000, 'time_steps': 252}
+    # )
+    pass
