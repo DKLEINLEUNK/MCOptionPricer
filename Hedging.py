@@ -21,56 +21,68 @@ from MonteCarlo import MonteCarlo
 
 class Delta:
 
-    def bump_and_revalue(self, Option:MonteCarlo, bump_size=0.01):
+    def bump_and_revalue(self, option:MonteCarlo, n_simulation, bump_size=0.01, other_params=None):
         '''
         Estimate the hedge parameter in Monte Carlo using bump-and-revalue method.
         
         Parameters
         ----------
-        Option : EUPut or EUCall
-            The option object to hedge.
+        option : MonteCarlo
+            The option clas to be hedged.
         bump_size : float
-            The size of the bump in the underlying asset price.
+            The size of the bump to the underlying price.
+        model_params : dict
+            The parameters for the underlying model.
         '''
-        original_prices = []
-        for _ in range(100):
-            Option.simulate_paths()
-            plt.plot(np.arange(Option.time_steps + 1), Option.price_paths[:,0])
-            original_prices.append(Option.price_option())
+        # original_prices = []
+        # for _ in range(100):
+        # Option.simulate_paths()
+        # plt.plot(np.arange(Option.time_steps + 1), Option.price_paths[:,0])
+        # plt.show()
 
-        plt.show()
+        # Initialiate the option
+        Option = option(simulations=n_simulation, **other_params)
+        price = Option.price_option()
 
-        original_price = np.mean(original_prices)  # find average over 100 estimates
-
-        Option.S0 = Option.S0 + bump_size  # bump the price
+        # Bump the price and revalue the option
+        Option.S0 = Option.S0 + bump_size
         print(f'Bumped S0 to {Option.S0}...')
         
-        bumped_prices = []
-        for _ in range(100):
-            Option.simulate_paths()
-            bumped_prices.append(Option.price_option())
+        Option.price_paths = None  # reset price paths
+        bumped_price = Option.price_option()
         
-        bumped_price = np.mean(bumped_prices)  # find average over 100 estimates
-
-        print(f'Original price: {original_price}')
+        print(f'Original price: {price}')
         print(f'Bumped price: {bumped_price}')
 
-        delta = (bumped_price - original_price) / bump_size
+        delta = (bumped_price - price) / bump_size
 
         return delta
     
 
 if __name__ == '__main__':
 
-    european_call = EUCall(
-        S0=100,
-        K=99,
-        T=1,
-        r=0.06,
-        sigma=0.2,
-        simulations=10_000,
-        time_steps=252
-    )
-    delta = Delta().bump_and_revalue(european_call, bump_size=0.1)
+    option = EUCall
 
-    print(f'Delta for {european_call.name}: {delta}')
+    model_params = {
+        'S0': 100,
+        'K' : 99,
+        'T': 1,
+        'r': 0.06,
+        'sigma': 0.2,
+        'time_steps': 252
+    }
+    
+    import time
+
+    start = time.time()
+
+    delta = Delta().bump_and_revalue(
+        option=option,
+        n_simulation=1_000_000,
+        bump_size=0.2,
+        other_params=model_params
+    )
+
+    print(f'Time taken: {time.time() - start}')
+    
+    print(f'Delta for EUCall: {delta}')
