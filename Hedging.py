@@ -84,14 +84,10 @@ class Delta:
 
         # Bump the price and revalue the option
         self.Option.S0 = self.Option.S0 + bump_size
-        # print(f'Bumped S0 to {self.Option.S0}...')
-        
+    
         self.Option.price_paths = None  # reset price paths
         bumped_price = self.Option.price_option()
         
-        # print(f'Original price: {price}')
-        # print(f'Bumped price: {bumped_price}')
-
         delta = (bumped_price - price) / bump_size
 
         return delta
@@ -128,7 +124,8 @@ class Delta:
 
         Y = (np.log(S_T/S_0) - (r - sigma**2/2)*T) / (S_0 * sigma**2 * T)  # note: this is a vector
         payoff = S_T >= self.Option.K
-        delta = np.mean(np.exp(-r*T) * payoff * (Y / S_0*sigma*np.sqrt(T)))
+        delta = np.mean(np.exp(-r*T) * payoff * (Y)) # note: this was changed from the assignment
+        
         return delta
 
 
@@ -164,31 +161,27 @@ if __name__ == '__main__':
         'time_steps': 252
     }
 
-
-
     delta = Delta(
         option=option,
         params=model_params
     )
 
     path_wise_estimate = delta.path_wise()
-    print(f'Path wise delta estimate: {path_wise_estimate}')
-
+    print(path_wise_estimate)
     likelihood_ratio_estimate = delta.likelihood_ratio()
-    print(f'Likelihood ratio delta estimate: {likelihood_ratio_estimate}')
+    print(likelihood_ratio_estimate)
+    # delta_bump_estimates = []
+    # delta_pathwise_estimates = []
 
-    delta_bump_estimates = []
-    delta_pathwise_estimates = []
+    # for i in range(100):
 
-    for i in range(100):
-
-        delta_bump = delta.bump_and_revalue()
-        delta_bump_estimates.append(delta_bump)
-        delta_path_wise = delta.path_wise()
-        delta_pathwise_estimates.append(delta_path_wise)
+    #     delta_bump = delta.bump_and_revalue()
+    #     delta_bump_estimates.append(delta_bump)
+    #     delta_path_wise = delta.path_wise()
+    #     delta_pathwise_estimates.append(delta_path_wise)
     
-    plt.hist(delta_bump_estimates, bins = 30)
-    plt.show()
+    # plt.hist(delta_bump_estimates, bins = 30)
+    # plt.show()
 
     
     
@@ -210,8 +203,7 @@ if __name__ == '__main__':
     #     for delta in deltas:
     #         f.write(f'{delta}\n')
     
-    # print(f'Time taken: {time.time() - start}')
-    
+
     # import pandas as pd
     
     # anal = hedge_parameter_black_scholes(**model_params)
