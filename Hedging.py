@@ -113,6 +113,28 @@ class Delta:
         return delta
 
 
+    def likelihood_ratio(self):
+        '''
+        Formulas
+        --------
+        Y = (log(S_T/S_0) - (r - sigma^2/2)T) / (S_0 * sigma^2 * sqrt(T))
+        delta = E[e^(-rT) * 1{S_T>=K} * Y / (S_0 * sigma * sqrt(T))]
+        '''
+        price = self.Option.price_option()
+
+        S_T = self.Option.price_paths[-1]
+        S_0 = self.Option.price_paths[0]
+        T = self.Option.T
+        r = self.Option.r
+        sigma = self.Option.sigma
+
+        Y = (np.log(S_T/S_0) - (r - sigma**2/2)*T) / (S_0 * sigma**2 * T)  # note: this is a vector
+        payoff = S_T >= self.Option.K
+        delta = np.mean(np.exp(-r*T) * payoff * (Y / S_0*sigma*np.sqrt(T)))
+        return delta
+
+
+
     def export_deltas(self):
         pass
     
@@ -138,8 +160,12 @@ if __name__ == '__main__':
         params=model_params
     )
 
-    delta_estimate = delta.path_wise()
-    print(delta_estimate)
+    path_wise_estimate = delta.path_wise()
+    print(f'Path wise delta estimate: {path_wise_estimate}')
+
+    likelihood_ratio_estimate = delta.likelihood_ratio()
+    print(f'Likelihood ratio delta estimate: {likelihood_ratio_estimate}')
+
     
 
     
