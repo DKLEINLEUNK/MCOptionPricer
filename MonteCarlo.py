@@ -61,6 +61,8 @@ class MonteCarlo:
 
         #To be initialised later
         self.price_paths = None
+        self.RMSE = None
+
 
         
 
