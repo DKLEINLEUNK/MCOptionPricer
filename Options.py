@@ -111,7 +111,7 @@ class DigitalOption(MonteCarlo):
         if self.price_paths is None:
             self.simulate_paths()
         
-        payoff = self.price_paths[-1] >= self.barrier
+        payoff = self.price_paths[-1] >= self.K
         price = np.exp(-self.r * self.T) * np.mean(payoff)
 
         return price

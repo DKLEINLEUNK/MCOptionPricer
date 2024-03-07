@@ -15,7 +15,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from utils import progress_bar, clear_progress_bar, phi
-from Options import EUPut, EUCall
+from Options import EUPut, EUCall, DigitalOption
 from MonteCarlo import MonteCarlo
 
 
@@ -98,8 +98,6 @@ class Delta:
     
     def path_wise(self):
 
-
-        # Initialiate the option
         price = self.Option.price_option()
 
         payoff = self.Option.price_paths[-1] >= self.Option.K
@@ -122,7 +120,18 @@ if __name__ == '__main__':
     # import time
     # start = time.time()
     
-    option = EUCall
+    # option = EUCall
+    # model_params = {
+    #     'S0': 100,
+    #     'K' : 99,
+    #     'T': 1,
+    #     'r': 0.06,
+    #     'sigma': 0.2,
+    #     'simulations': 100_000,
+    #     'time_steps': 252
+    # }
+
+    option = DigitalOption
     model_params = {
         'S0': 100,
         'K' : 99,
@@ -133,13 +142,27 @@ if __name__ == '__main__':
         'time_steps': 252
     }
 
+
+
     delta = Delta(
         option=option,
         params=model_params
     )
 
-    delta_estimate = delta.path_wise()
-    print(delta_estimate)
+    delta_bump_estimates = []
+    delta_pathwise_estimates = []
+
+    for i in range(100):
+
+        delta_bump = delta.bump_and_revalue()
+        delta_bump_estimates.append(delta_bump)
+        delta_path_wise = delta.path_wise()
+        delta_pathwise_estimates.append(delta_path_wise)
+    
+    plt.hist(delta_bump_estimates, bins = 30)
+    plt.show()
+
+    
     
 
     
