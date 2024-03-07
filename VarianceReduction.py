@@ -68,11 +68,14 @@ class AsianOption(MonteCarlo):
         '''
         Analytical expression for the price of an Asian option based on geometric averages.
         '''
-        alpha = 2*self.r / self.sigma**2
-        adj_sigma = self.sigma * np.sqrt((2/self.T) * (1 - np.exp(-alpha * self.T)) / alpha)
-        d1 = (np.log(self.S0/self.K) + (self.r + adj_sigma**2/2) * self.T) / (adj_sigma * np.sqrt(self.T))
-        d2 = d1 - adj_sigma * np.sqrt(self.T)        
-        C = np.exp(-self.r * self.T) * (self.S0 * np.exp((self.r - adj_sigma**2 / 2) * self.T) * phi(d1) - self.K * phi(d2))
+        N = self.time_steps  # assume number of observations = number of time steps
+
+        sigma_tilda = self.sigma * np.sqrt((2*N + 1) / (6*(N + 1)))
+        r_tilda = ((self.r - self.sigma**2/2) + (sigma_tilda**2)) / 2
+        d1_tilda = (np.log(self.S0/self.K) + (r_tilda + sigma_tilda**2/2)*self.T) / np.sqrt(self.T*sigma_tilda)
+        d2_tilda = (np.log(self.S0/self.K) - (r_tilda + sigma_tilda**2/2)*self.T) / np.sqrt(self.T*sigma_tilda)
+        # C = np.exp((r_tilda-self.r)*self.T) * self.S0 * phi(d1_tilda) - self.K * phi(d2_tilda)
+        C = np.exp(-self.r*self.T) * self.S0 * np.exp(r_tilda*self.T) * phi(d1_tilda) - self.K * phi(d2_tilda)
         return C
 
 
@@ -85,6 +88,9 @@ class AsianOption(MonteCarlo):
         arithmetic_averages = np.mean(S, axis=0)
         geometric_averages = np.exp(np.mean(np.log(S), axis=0))
         expected_geometric = self.geometric_pricing()
+
+        # print(geometric_averages)
+        # print(arithmetic_averages)
 
         payoff_arithmetic = np.maximum(arithmetic_averages - self.K, 0)
         payoff_geometric = np.maximum(geometric_averages - self.K, 0)
@@ -121,8 +127,8 @@ def main():
         time_steps=252
     )
 
-    # print(f'Price of Asian option based on arithmetic averages: {asian_option.price_option(method='arithmetic')}')
-    # print(f'Price of Asian option based on geometric averages: {asian_option.price_option(method='geometric')}')
+    print(f'Price of Asian option based on arithmetic averages: {asian_option.price_option(method='arithmetic')}')
+    print(f'Price of Asian option based on geometric averages: {asian_option.price_option(method='geometric')}')
     print(f'Price of Asian option based on control variates: {asian_option.price_option(method="control_variate")}')
     
 
