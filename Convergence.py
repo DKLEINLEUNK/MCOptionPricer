@@ -83,8 +83,9 @@ class Convergence:
            
            price = put.price_option() #Compute price estimate
            price_estimates.append(price)
-
-           lower_95, upper_95, lower_99, upper_99 = put.compute_CI() #Compute bounds for 95% and 99% CI
+           put.compute_RMSE() #Compute the RMSE
+           
+           lower_95, upper_95, lower_99, upper_99 = put.compute_CI(price) #Compute bounds for 95% and 99% CI
            lower_95_CI_values.append(lower_95)
            upper_95_CI_values.append(upper_95)
            lower_99_CI_values.append(lower_99)
@@ -112,6 +113,39 @@ class Convergence:
         plt.ylabel("Price estimates")
         plt.legend()
         plt.show()
+
+    
+    def standard_error():
+        
+        '''
+        Description
+        -----------
+        Calculates the standard error of the MC estimate for increasing N
+        '''
+
+        num_of_trials = np.arange(500,100_500,500)
+        RMSEs = []
+
+        for trials in num_of_trials:
+
+            put = EUPut(
+               S0=100,
+                K=99,
+                T=1,
+                r=0.06,
+                sigma=0.2,
+                simulations= trials, #Vary number of trials
+                time_steps=250
+            )
+            put.price_option()
+            put.compute_RMSE()
+            RMSEs.append(put.RMSE)
+
+        plt.plot(num_of_trials, RMSEs)
+        plt.xlabel("Number of trials")
+        plt.ylabel("Standard errors")
+        plt.show()
+
 
 
     def strike_sensitivity():
@@ -193,8 +227,10 @@ if __name__ == "__main__":
     #-----------------------------
    
     Convergence.convergence_to_black_scholes()
-    Convergence.strike_sensitivity()
-    Convergence.sigma_sensitivity()
+    #Convergence.standard_error()
+    #Convergence.strike_sensitivity()
+    #Convergence.sigma_sensitivity()
+
 
 
     #-----------------------------
