@@ -14,75 +14,137 @@ Delta Hedging Digital Options:
 import numpy as np
 import matplotlib.pyplot as plt
 
-from utils import progress_bar, clear_progress_bar
+from utils import progress_bar, clear_progress_bar, phi
 from Options import EUPut, EUCall
 from MonteCarlo import MonteCarlo
 
 
+def hedge_parameter_black_scholes(S0, K, T, r, sigma, **kwargs):
+    '''
+    Description
+    -----------
+    Calculates the delta hedge parameter for a European call option.
+    
+    Parameters
+    ----------
+    `S0` : float
+        Initial stock price.
+    `K` : float
+        Strike price.
+    `T` : float
+        Maturity.
+    `r` : float
+        Risk-free interest rate.
+    `sigma` : float
+        Volatility.
+    '''
+    d1 = (np.log(S0/K) + (r + (sigma**2)/2)*T) / (T*np.sqrt(T))
+    return phi(d1)
+
+
 class Delta:
 
-    def bump_and_revalue(self, option:MonteCarlo, n_simulation, bump_size=0.01, other_params=None):
+
+    def __init__(self, option:MonteCarlo, params=None):
+        '''
+        Parameters
+        ----------
+        option : MonteCarlo
+            The option clas to be hedged.
+        model_params : dict
+            The parameters for the underlying model.
+        '''
+        self.Option = option(**params)
+        self.params = params
+
+
+    def bump_and_revalue(self, bump_size=0.01, same_seed=False):
         '''
         Estimate the hedge parameter in Monte Carlo using bump-and-revalue method.
         
         Parameters
         ----------
-        option : MonteCarlo
-            The option clas to be hedged.
         bump_size : float
             The size of the bump to the underlying price.
-        model_params : dict
-            The parameters for the underlying model.
         '''
+        # TODO: look into using different seeds for bumped and unbumped estimates
+        # TODO: use multiple simulations instead of just one
         # original_prices = []
         # for _ in range(100):
         # Option.simulate_paths()
         # plt.plot(np.arange(Option.time_steps + 1), Option.price_paths[:,0])
         # plt.show()
 
+        if same_seed:
+            seed = np.random.randint(100_000)
+            np.random.seed(seed)
+
         # Initialiate the option
-        Option = option(simulations=n_simulation, **other_params)
-        price = Option.price_option()
+        price = self.Option.price_option()
 
         # Bump the price and revalue the option
-        Option.S0 = Option.S0 + bump_size
-        print(f'Bumped S0 to {Option.S0}...')
+        self.Option.S0 = self.Option.S0 + bump_size
+        # print(f'Bumped S0 to {self.Option.S0}...')
         
-        Option.price_paths = None  # reset price paths
-        bumped_price = Option.price_option()
+        self.Option.price_paths = None  # reset price paths
+        bumped_price = self.Option.price_option()
         
-        print(f'Original price: {price}')
-        print(f'Bumped price: {bumped_price}')
+        # print(f'Original price: {price}')
+        # print(f'Bumped price: {bumped_price}')
 
         delta = (bumped_price - price) / bump_size
 
         return delta
     
 
+    def export_deltas(self):
+        pass
+
+
 if __name__ == '__main__':
 
+    # import time
+    # start = time.time()
+    
     option = EUCall
-
     model_params = {
         'S0': 100,
         'K' : 99,
         'T': 1,
         'r': 0.06,
         'sigma': 0.2,
+        'simulations': 100_000,
         'time_steps': 252
     }
+
+    # delta = Delta(
+    #     option=option,
+    #     params=model_params
+    # )
     
-    import time
+    # deltas = []
 
-    start = time.time()
+    # for _ in range(100):
 
-    delta = Delta().bump_and_revalue(
-        option=option,
-        n_simulation=1_000_000,
-        bump_size=0.2,
-        other_params=model_params
-    )
-
-    print(f'Time taken: {time.time() - start}')
+    #     delta = Delta(
+    #         option=option,
+    #         params=model_params
+    #     )
     
-    print(f'Delta for EUCall: {delta}')
+    #     hedge_param = delta.bump_and_revalue(bump_size=0.1, same_seed=True)
+    #     deltas.append(hedge_param)
+
+    # with open('deltas_same_seed_M_100_N_100_000.csv', 'w') as f:
+    #     for delta in deltas:
+    #         f.write(f'{delta}\n')
+    
+    # print(f'Time taken: {time.time() - start}')
+    
+    import pandas as pd
+    
+    anal = hedge_parameter_black_scholes(**model_params)
+    data = pd.read_csv('deltas_same_seed_M_100_N_100_000.csv')
+
+    plt.hist(data, bins=20)
+    plt.axvline(anal, color='r', linestyle='--')
+    plt.show()
