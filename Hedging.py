@@ -96,10 +96,26 @@ class Delta:
 
         return delta
     
+    def path_wise(self):
+
+
+        # Initialiate the option
+        price = self.Option.price_option()
+
+        payoff = self.Option.price_paths[-1] >= self.Option.K
+
+        ratio = self.Option.price_paths[-1]/self.Option.price_paths[0] #ST/S0
+
+        delta_path = np.exp(-self.Option.r * self.Option.T) * payoff * ratio  #A list of deltas for each stock path
+
+        delta = np.mean(delta_path) #The final estimate for delta
+
+        return delta
+
 
     def export_deltas(self):
         pass
-
+    
 
 if __name__ == '__main__':
 
@@ -117,10 +133,15 @@ if __name__ == '__main__':
         'time_steps': 252
     }
 
-    # delta = Delta(
-    #     option=option,
-    #     params=model_params
-    # )
+    delta = Delta(
+        option=option,
+        params=model_params
+    )
+
+    delta_estimate = delta.path_wise()
+    print(delta_estimate)
+    
+
     
     # deltas = []
 
@@ -140,11 +161,11 @@ if __name__ == '__main__':
     
     # print(f'Time taken: {time.time() - start}')
     
-    import pandas as pd
+    # import pandas as pd
     
-    anal = hedge_parameter_black_scholes(**model_params)
-    data = pd.read_csv('deltas_same_seed_M_100_N_100_000.csv')
+    # anal = hedge_parameter_black_scholes(**model_params)
+    # data = pd.read_csv('deltas_same_seed_M_100_N_100_000.csv')
 
-    plt.hist(data, bins=20)
-    plt.axvline(anal, color='r', linestyle='--')
-    plt.show()
+    # plt.hist(data, bins=20)
+    # plt.axvline(anal, color='r', linestyle='--')
+    # plt.show()
