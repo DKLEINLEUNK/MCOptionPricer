@@ -105,32 +105,29 @@ class AsianOption(MonteCarlo):
         return C
     
 
-    # def get_attributes(self):
-    #     # Calculate or return pre-calculated attributes
-    #     return {
-    #         'price': [/* list of prices */],
-    #         'delta': [/* list of deltas */],
-    #         'gamma': [/* list of gammas */],
-    #         'theta': [/* list of thetas */],
-    #         'vega': [/* list of vegas */]
-    #     }
-
 
 def main():
-    asian_option = AsianOption(
-        S0=100,
-        K=99,
-        T=1,
-        r=0.06,
-        sigma=0.20,
-        simulations=100_000,
-        time_steps=252
-    )
-
-    print(f'Price of Asian option based on arithmetic averages: {asian_option.price_option(method='arithmetic')}')
-    print(f'Price of Asian option based on geometric averages: {asian_option.price_option(method='geometric')}')
-    print(f'Price of Asian option based on control variates: {asian_option.price_option(method="control_variate")}')
     
+    arithmetic, geometric, both = [], [], []
+    for _ in range(100):
+        asian_option = AsianOption(
+            S0=100,
+            K=99,
+            T=1,
+            r=0.06,
+            sigma=0.20,
+            simulations=100_000,
+            time_steps=252
+        )
+        arithmetic.append(asian_option.price_option(method='arithmetic'))
+        geometric.append(asian_option.price_option(method='geometric'))
+        both.append(asian_option.price_option(method='control_variate'))
+
+    print('Variances')
+    print('---------')
+    print(f'Arithmetic: {np.var(arithmetic)}')
+    print(f'Geometric: {np.var(geometric)}')
+    print(f'Control Variate: {np.var(both)}')
 
 if __name__ == '__main__':
     main()

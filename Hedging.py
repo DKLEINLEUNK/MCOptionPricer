@@ -92,16 +92,22 @@ class Delta:
 
         return delta
     
+
     def path_wise(self):
+        epsilon = 0.1  # smoothing parameter TODO: make variable
 
         price = self.Option.price_option()
 
-        payoff = self.Option.price_paths[-1] >= self.Option.K
+        S_T = self.Option.price_paths[-1]
+        S_0 = self.Option.price_paths[0]
+        K = self.Option.K
+        T = self.Option.T
+        r = self.Option.r
 
-        ratio = self.Option.price_paths[-1]/self.Option.price_paths[0] #ST/S0
-
-        delta_path = np.exp(-self.Option.r * self.Option.T) * payoff * ratio  #A list of deltas for each stock path
-
+        # Apply smoothing to payoff
+        payoff = 1 / (1 - np.exp(-(S_T - K)/epsilon))
+        ratio = S_T /S_0
+        delta_path = np.exp(-r * T) * payoff * ratio  #A list of deltas for each stock path
         delta = np.mean(delta_path) #The final estimate for delta
 
         return delta
@@ -165,7 +171,7 @@ if __name__ == '__main__':
         option=option,
         params=model_params
     )
-
+    
     path_wise_estimate = delta.path_wise()
     print(path_wise_estimate)
     likelihood_ratio_estimate = delta.likelihood_ratio()
