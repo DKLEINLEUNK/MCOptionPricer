@@ -101,6 +101,7 @@ class Convergence:
         sigma=0.2
     )
         
+        plt.figure(figsize=(6, 5))
             
         plt.plot(num_of_trials, price_estimates, label = "MC Price", color = "blue")
         plt.plot(num_of_trials,lower_95_CI_values, linestyle='--', label = "Lower 95% CI", color = "black")
@@ -108,10 +109,13 @@ class Convergence:
         plt.plot(num_of_trials,lower_99_CI_values, linestyle='--', label = "Lower 99% CI", color = "grey")
         plt.plot(num_of_trials,upper_99_CI_values, linestyle='--', label = "Upper 99% CI", color = "grey")
         plt.axhline([bs_price], label="BS Price", color= "r")
-        plt.xlabel("Number of trials")
+        plt.xlabel("Number of trials", fontsize=14)
         plt.xscale('log')
-        plt.ylabel("Price estimates")
-        plt.legend()
+        plt.ylabel("Price estimates", fontsize=14)
+        plt.yticks(fontsize=12)
+        plt.xticks(fontsize=12)
+        plt.legend(fontsize=12)
+        plt.savefig("plots/plot_q1_convergence", dpi = 300)
         plt.show()
 
     
@@ -123,7 +127,7 @@ class Convergence:
         Calculates the standard error of the MC estimate for increasing N
         '''
 
-        num_of_trials = np.arange(500,100_500,500)
+        num_of_trials = np.arange(1000,100_500,1000)
         RMSEs = []
 
         for trials in num_of_trials:
@@ -141,9 +145,14 @@ class Convergence:
             put.compute_RMSE()
             RMSEs.append(put.RMSE)
 
+        plt.figure(figsize=(6, 5))
         plt.plot(num_of_trials, RMSEs)
         plt.xlabel("Number of trials")
-        plt.ylabel("Standard errors")
+        plt.ylabel("Standard error")
+        plt.yticks(fontsize=12)
+        plt.xticks(fontsize=12)
+        plt.legend(fontsize=12)
+        plt.savefig("plots/plot_q1_standard_error", dpi = 300)
         plt.show()
 
 
@@ -159,7 +168,8 @@ class Convergence:
         """
 
         Ks = np.arange(10,310,10)
-        prices = []
+        mc_prices = []
+        bs_prices = []
 
         for K in Ks:
 
@@ -173,16 +183,45 @@ class Convergence:
             time_steps=250,
         )
             
-            price = put.price_option()
-            prices.append(price)
-        
-        
+            #Compute MC price
+            mc_price = put.price_option()
+            mc_prices.append(mc_price)
 
-        plt.plot(Ks, prices)
-        plt.xlabel("K")
-        plt.ylabel("Prices")
+            #Compute BS Price
+            bs_price = Convergence.value_option_black_scholes(
+            S_t=100,
+            K=K,
+            tau=1,
+            r=0.06,
+            sigma=0.2
+        )   
+            bs_prices.append(bs_price)
+
+        price_differences = np.abs(np.array(mc_prices)-np.array(bs_prices)) 
+
+        #MC price for different K's
+        plt.figure(figsize=(5, 4))
+        plt.plot(Ks, mc_prices)
+        plt.xlabel("K",fontsize=14)
+        plt.ylabel("Prices", fontsize=14)
+        plt.yticks(fontsize=12)
+        plt.xticks(fontsize=12)
+        plt.legend(fontsize=12)
         plt.show()
-    
+
+        #Difference between MC price and BS price for different K's
+        plt.figure(figsize=(5, 4))
+        plt.plot(Ks, price_differences)
+        plt.xlabel("K",fontsize=14)
+        plt.ylabel('$|\\widehat{f}-f|$', fontsize=14)
+        plt.yticks(fontsize=12)
+        plt.xticks(fontsize=12)
+        plt.legend(fontsize=12)
+        plt.show()
+
+
+
+
     def sigma_sensitivity():
 
         """
@@ -193,7 +232,8 @@ class Convergence:
         """
 
         sigmas = np.arange(0,1.05,0.05)
-        prices = []
+        mc_prices = []
+        bs_prices = []
 
         for sigma in sigmas:
 
@@ -206,16 +246,43 @@ class Convergence:
             simulations=10_000,
             time_steps=250,
         )
-            
-            price = put.price_option()
-            prices.append(price)
-        
+            #Compute MC price
+            mc_price = put.price_option()
+            mc_prices.append(mc_price)
         
 
-        plt.plot(sigmas, prices)
-        plt.xlabel("$\\sigma$")
-        plt.ylabel("Prices")
+           #Compute BS Price
+            bs_price = Convergence.value_option_black_scholes(
+            S_t=100,
+            K=99,
+            tau=1,
+            r=0.06,
+            sigma=sigma
+        )   
+            bs_prices.append(bs_price)
+
+        price_differences = np.abs(np.array(mc_prices)-np.array(bs_prices)) 
+
+        #MC price for different sigmas
+        plt.figure(figsize=(5, 4))
+        plt.plot(sigmas, mc_prices)
+        plt.xlabel("$\\sigma$",fontsize=14)
+        plt.ylabel("Prices", fontsize=14)
+        plt.yticks(fontsize=12)
+        plt.xticks(fontsize=12)
+        plt.legend(fontsize=12)
         plt.show()
+
+        #Difference between MC price and BS price for different sigmas
+        plt.figure(figsize=(5, 4))
+        plt.plot(sigmas, price_differences)
+        plt.xlabel("$\\sigma$",fontsize=14)
+        plt.ylabel('$|\\widehat{f}-f|$', fontsize=14)
+        plt.yticks(fontsize=12)
+        plt.xticks(fontsize=12)
+        plt.legend(fontsize=12)
+        plt.show()
+
 
 
 
@@ -226,8 +293,8 @@ if __name__ == "__main__":
     #TESTING implementation
     #-----------------------------
    
-    Convergence.convergence_to_black_scholes()
-    #Convergence.standard_error()
+    #Convergence.convergence_to_black_scholes()
+    Convergence.standard_error()
     #Convergence.strike_sensitivity()
     #Convergence.sigma_sensitivity()
 

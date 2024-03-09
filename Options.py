@@ -1,5 +1,6 @@
 import numpy as np
 from MonteCarlo import MonteCarlo
+import matplotlib.pyplot as plt
 
 
 class EUPut(MonteCarlo):
@@ -15,6 +16,32 @@ class EUPut(MonteCarlo):
         payoff = np.maximum(self.K - self.price_paths[-1], 0)
         price = np.exp(-self.r * self.T) * np.mean(payoff)
         return price
+    
+    def show_stock_paths(self):
+
+        '''
+        Description
+        -----------
+        Visualises the stock paths used in the computation of the options price 
+        '''
+        num_rows = self.price_paths.shape[0]
+        x_values = np.arange(num_rows)
+
+        plt.figure(figsize=(6, 5))
+
+        for i in range(self.price_paths.shape[1]):
+            plt.plot(x_values, self.price_paths[:, i])
+
+                
+        plt.xlabel("Days", fontsize=14)
+        plt.ylabel("Price", fontsize=14)
+        plt.yticks(fontsize=12)
+        plt.xticks(fontsize=12)
+        plt.legend(fontsize=12)
+        plt.savefig("plots/plot_q1_stock_paths", dpi = 300)
+        plt.show()
+
+
     
     def compute_RMSE(self):
 
@@ -100,7 +127,7 @@ class EuUpAndOutCall(MonteCarlo):
 
         return price
 
-
+    
 class DigitalOption(MonteCarlo):
     
     '''
