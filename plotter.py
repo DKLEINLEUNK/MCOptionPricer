@@ -50,16 +50,19 @@ def test_option_pricing(model_class, strikes, sigmas, other_params):
             model_instance = model_class(K=strike, sigma=sigma, **other_params)
             prices[i, j] = model_instance.price_option()
 
-    Strike, Sigma = np.meshgrid(strikes, sigmas, indexing='ij')
-
-    fig = plt.figure(figsize=(10, 7))
-    ax = fig.add_subplot(111, projection='3d')
-    surf = ax.plot_surface(Strike, Sigma, prices, cmap='viridis')
-
-    ax.set_xlabel('Strike Price')
-    ax.set_ylabel('Volatility')
-    ax.set_zlabel('Option Price')
-    ax.set_title('Option Prices for Varying Strike Prices and Volatilities')
-    fig.colorbar(surf, ax=ax, shrink=0.5, aspect=5)
+    plt.figure(figsize=(5, 4))
+    plt.style.use('seaborn-v0_8-bright')
+    # plt.style.use('seaborn-v0_8-darkgrid')
+    plt.imshow(prices, extent=[sigmas[0], sigmas[-1], strikes[0], strikes[-1]], origin='lower', aspect='auto', cmap='plasma')
     
+    cb = plt.colorbar()
+    cb.set_label(label='Option Price', fontsize=14)
+    cb.ax.tick_params(labelsize=12)
+    plt.xlabel('$\\sigma$', fontsize=14, fontweight='bold')
+    plt.ylabel('$K$', fontsize=14, fontweight='bold')
+    plt.yticks(fontsize=12)
+    plt.xticks(fontsize=12)
+    # plt.legend(fontsize=12)
+    # plt.show()
     plt.show()
+
