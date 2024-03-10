@@ -17,6 +17,7 @@ expression to those obtained by using Monte-Carlo simulations.
 
 # 1.a: Asian option pricing based on geometric & arithmetic averages
 #-------------------------------------------------------------------
+import matplotlib.pyplot as plt
 import numpy as np
 
 from utils import phi
@@ -61,7 +62,10 @@ class AsianOption(MonteCarlo):
         A = np.mean(S, axis=0)
         A = np.maximum(A - self.K, 0)
         C = np.exp(-self.r*self.T) * np.mean(A)
-        return C
+
+        C_se = np.sqrt(np.std(A) / np.sqrt(self.simulations))
+
+        return C, C_se
 
 
     def geometric_pricing(self):
@@ -102,32 +106,84 @@ class AsianOption(MonteCarlo):
         covariance = np.cov(payoff_arithmetic, payoff_geometric)
         beta = covariance[0, 1] / covariance[1, 1]
         C = C_arithmetic - beta * (C_geometric - expected_geometric)
-        return C
+        
+        C_se = np.sqrt(np.std(C) / np.sqrt(self.simulations))
+        
+        return C, C_se
     
+
+def plot_differences():
+    
+    arithmetic, geometric, both = [], [], []
+    aritmetic_SE, geometric_SE, both_SE = [], [], []
+    for K in range(90, 110, 1):
+        asian_option = AsianOption(
+            S0=100,
+            K=K,
+            T=1,
+            r=0.06,
+            sigma=0.20,
+            simulations=10_000,
+            time_steps=252
+        )
+        
+        mu_ar, se_ar = asian_option.price_option(method='arithmetic')
+        mu_ge = asian_option.price_option(method='geometric')
+        mu_bo, se_bo = asian_option.price_option(method='control_variate')
+
+        arithmetic.append(mu_ar)
+        geometric.append(mu_ge)
+        both.append(mu_bo)
+
+        aritmetic_SE.append(se_ar)
+        both_SE.append(se_bo)
+
+    plt.figure(figsize=(5, 4))
+    plt.style.use('seaborn-v0_8-bright')
+    plt.style.use('seaborn-v0_8-darkgrid')
+    plt.plot(range(90, 110, 1), arithmetic, label='Arithmetic', linestyle='-', linewidth=2)
+    plt.plot(range(90, 110, 1), geometric, label='Geometric', linestyle='-', linewidth=2)
+    plt.plot(range(90, 110, 1), both, label='Control Variate', linestyle='-', linewidth=2)
+    
+    plt.fill_between(range(90, 110, 1), np.array(arithmetic) - np.array(aritmetic_SE) * 1.96, np.array(arithmetic) + np.array(aritmetic_SE) * 1.96, alpha=0.3)
+    plt.fill_between(range(90, 110, 1), np.array(both) - np.array(both_SE) * 1.96, np.array(both) + np.array(both_SE) * 1.96, alpha=0.3)
+
+    plt.xlabel('$K$', fontsize=14)
+    plt.ylabel('Option Price', fontsize=14)
+    plt.yticks(fontsize=12)
+    plt.xticks(fontsize=12)
+    plt.legend(fontsize=12)
+    plt.show()
+
+    # print(asian_option.price_option(method='arithmetic'))
+    # print(asian_option.price_option(method='geometric'))
+    # print(asian_option.price_option(method='control_variate'))
 
 
 def main():
     
-    arithmetic, geometric, both = [], [], []
-    for _ in range(100):
-        asian_option = AsianOption(
-            S0=100,
-            K=99,
-            T=1,
-            r=0.06,
-            sigma=0.20,
-            simulations=100_000,
-            time_steps=252
-        )
-        arithmetic.append(asian_option.price_option(method='arithmetic'))
-        geometric.append(asian_option.price_option(method='geometric'))
-        both.append(asian_option.price_option(method='control_variate'))
+    plot_differences()
 
-    print('Variances')
-    print('---------')
-    print(f'Arithmetic: {np.var(arithmetic)}')
-    print(f'Geometric: {np.var(geometric)}')
-    print(f'Control Variate: {np.var(both)}')
+    # arithmetic, geometric, both = [], [], []
+    # for _ in range(100):
+    #     asian_option = AsianOption(
+    #         S0=100,
+    #         K=99,
+    #         T=1,
+    #         r=0.06,
+    #         sigma=0.20,
+    #         simulations=100_000,
+    #         time_steps=252
+    #     )
+    #     arithmetic.append(asian_option.price_option(method='arithmetic'))
+    #     geometric.append(asian_option.price_option(method='geometric'))
+    #     both.append(asian_option.price_option(method='control_variate'))
+
+    # print('Variances')
+    # print('---------')
+    # print(f'Arithmetic: {np.var(arithmetic)}')
+    # print(f'Geometric: {np.var(geometric)}')
+    # print(f'Control Variate: {np.var(both)}')
 
 if __name__ == '__main__':
     main()

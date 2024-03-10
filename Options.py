@@ -203,11 +203,11 @@ if __name__ == '__main__':
     # print(f'Price for {upAndOutCall.name}: {upAndOutCall.price_option()}')
 
     # S0, K, T, r, sigma,
-    # from plotter import test_option_pricing
-    # test_option_pricing(
-    #     EUCall,
-    #     strikes=np.linspace(50, 150, 20),  # Example strike prices range
-    #     sigmas=np.linspace(0.1, 0.5, 20),  # Example volatilities range
-    #     other_params={'S0': 100, 'T': 1, 'r': 0.06, 'simulations': 10_000, 'time_steps': 252}
-    # )
+    from plotter import test_option_pricing
+    test_option_pricing(
+        EUCall,
+        strikes=np.linspace(50, 150, 20),  # Example strike prices range
+        sigmas=np.linspace(0.1, 0.5, 20),  # Example volatilities range
+        other_params={'S0': 100, 'T': 1, 'r': 0.06, 'simulations': 10_000, 'time_steps': 252}
+    )
     pass
