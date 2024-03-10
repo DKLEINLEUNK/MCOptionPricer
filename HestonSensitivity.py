@@ -43,18 +43,21 @@ class sensitivityAnalysis:
             kappa = 2, 
             epsilon = 0.1,
             rho =  -0.7,
-            V0 = 0.10 
+            V0 = 0.20 
         )
             
             price = upAndOutCall.price_option()
             prices.append(price)
         
-
+        plt.figure(figsize=(5, 4))
         plt.plot(barriers, prices)
-        plt.xlabel("Barriers")
-        plt.ylabel("Prices")
+        plt.xlabel("Barrier")
+        plt.ylabel("Price")
+        plt.yticks(fontsize=12)
+        plt.xticks(fontsize=12)
+        plt.legend(fontsize=12)
         plt.show()
-
+        
 
     def correlation_sensitivity():
 
@@ -84,20 +87,23 @@ class sensitivityAnalysis:
             kappa = 2, 
             epsilon = 0.1,
             rho =  rho, #Vary rho's
-            V0 = 0.10 
+            V0 = 0.20 
         )
             
             price = upAndOutCall.price_option()
             prices.append(price)
         
-        
-
+        plt.figure(figsize=(5, 4))
         plt.plot(rhos, prices)
         plt.axvline(x=0, color='r', linestyle=':')
         plt.xlabel("$\\rho$")
         plt.ylabel("Prices")
+        plt.yticks(fontsize=12)
+        plt.xticks(fontsize=12)
+        plt.legend(fontsize=12)
         plt.show()
 
+        
     def vol_of_vol_sensitivity():
 
         """
@@ -126,18 +132,24 @@ class sensitivityAnalysis:
             kappa = 2, 
             epsilon = epsilon,
             rho =  -0.7, #Vary rho's
-            V0 = 0.10 
+            V0 = 0.20 
         )
             
             price = upAndOutCall.price_option()
             prices.append(price)
         
-        
-
-        plt.plot(epsilons, prices)
+        plt.figure(figsize=(5, 4))
+        plt.plot(epsilons, prices)        
         plt.xlabel("$\\epsilon$")
         plt.ylabel("Prices")
+        plt.yticks(fontsize=12)
+        plt.xticks(fontsize=12)
+        plt.legend(fontsize=12)
         plt.show()
+
+        
+        
+        
 
             
             

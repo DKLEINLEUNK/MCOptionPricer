@@ -199,7 +199,7 @@ if __name__ == '__main__':
         kappa = 2, 
         epsilon = 0.1,
         rho = -0.7,
-        V0 = 0.10 
+        V0 = 0.20 
      )
     
     carlo.simulate_paths_heston()
