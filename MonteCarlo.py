@@ -93,7 +93,7 @@ class MonteCarlo:
         dt = self.T / self.time_steps
         
         Z = np.random.standard_normal((self.time_steps, self.simulations)) #A matrix consisiting of random numbers
-        print(Z[0])
+        # print(Z[0])
 
         S = np.zeros((self.time_steps + 1, self.simulations))  # +1 for initial price S0
         S[0] = self.S0 #Initialises the entire first row of the S matrix to the starting stock price
@@ -103,7 +103,7 @@ class MonteCarlo:
             S[t] = S[t - 1] * np.exp((self.r - 0.5 * self.sigma**2) * dt + self.sigma * np.sqrt(dt) * Z[t - 1]) #For each row (each time step), calculate the next stock price for each simulation  
             # progress_bar(t / self.time_steps)                                                                   #We put the -1 in the Z index to ensure that we start from the 0'th row of the random matrix
         
-        print(S[40])
+        # print(S[40])
         # TODO add a self.with_progress_bar attribute
         # clear_progress_bar()
         
