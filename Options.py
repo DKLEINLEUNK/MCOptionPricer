@@ -15,34 +15,32 @@ class EUPut(MonteCarlo):
         
         payoff = np.maximum(self.K - self.price_paths[-1], 0)
         price = np.exp(-self.r * self.T) * np.mean(payoff)
+        
         return price
     
-    def show_stock_paths(self):
 
+    def plot_stock_paths(self, save=False):
         '''
         Description
         -----------
-        Visualises the stock paths used in the computation of the options price 
+        Visualises the first 50 paths generated in the Monte Carlo simulation. 
         '''
         num_rows = self.price_paths.shape[0]
         x_values = np.arange(num_rows)
 
         plt.figure(figsize=(6, 5))
 
-        for i in range(self.price_paths.shape[1]):
+        for i in range(50):
             plt.plot(x_values, self.price_paths[:, i])
 
-                
-        plt.xlabel("Days", fontsize=14)
-        plt.ylabel("Price", fontsize=14)
+        plt.xlabel("$t$", fontsize=14)
+        plt.ylabel("$S_t$", fontsize=14)
         plt.yticks(fontsize=12)
         plt.xticks(fontsize=12)
-        plt.legend(fontsize=12)
-        plt.savefig("plots/plot_q1_stock_paths", dpi = 300)
+        plt.savefig("plots/plot_q1_stock_paths", dpi = 300)  if save else None
         plt.show()
 
 
-    
     def compute_RMSE(self):
 
         '''
@@ -97,9 +95,9 @@ class EUCall(MonteCarlo):
     A class for pricing European call options using Monte Carlo simulation.
     '''
 
-    def price_option(self):
+    def price_option(self, same_seed=False, state=None):
         if self.price_paths is None:
-            self.simulate_paths()
+            self.simulate_paths(same_seed, state)
             
         
         payoff = np.maximum(self.price_paths[-1] - self.K, 0)

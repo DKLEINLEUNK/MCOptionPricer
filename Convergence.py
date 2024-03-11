@@ -17,40 +17,38 @@ class Convergence:
 
     #TODO : Perform multiple simulations to obtain the true estimate of the Put option 
     
-    def value_option_black_scholes(S_t, K, tau, r, sigma):
+    def analytical_solution(S0, K, T, r, sigma, **kwargs):
         '''
         Description
         -----------
-        Calculates the value of a European put option 
-        using the Black-Scholes formula.
+        Calculates the value of a European put option using the Black-Scholes solution.
 
         Parameters
         ----------
-        `S_t` : float
-            Current stock price at t.
+        `S0` : float
+            Initial stock price.
         `K` : float
             Strike price.
+        `T` : float
+            Maturity.
         `r` : float
             Risk-free interest rate.
-        `vol` : float
+        `sigma` : float
             Volatility.
-        `tau` : float
-            Time to expiration, tau = T - t.
         '''
-        d1 = (np.log(S_t/K) + (r + (sigma**2)/2)*tau) / (sigma*np.sqrt(tau))
+        d1 = (np.log(S0/K) + (r + (sigma**2)/2)*T) / (sigma*np.sqrt(T))
         N_d1 = si.norm.cdf(d1)
-        d2 = d1 - sigma*np.sqrt(tau)
+        d2 = d1 - sigma*np.sqrt(T)
         N_d2 = si.norm.cdf(d2)
 
-        N_d1_negative = 1 - N_d1 #N(-d1)
-        N_d2_negative = 1 - N_d2 #N(-d2)
+        N_d1_negative = 1 - N_d1
+        N_d2_negative = 1 - N_d2
+
+        return K*np.exp(-r*T)*N_d2_negative - S0*N_d1_negative
 
 
-        return K*np.exp(-r*tau)*N_d2_negative - S_t*N_d1_negative
 
-
-
-    def convergence_to_black_scholes():
+    def convergence_to_black_scholes(save=False):
         
         '''
         Description
@@ -115,7 +113,7 @@ class Convergence:
         plt.yticks(fontsize=12)
         plt.xticks(fontsize=12)
         plt.legend(fontsize=12)
-        plt.savefig("plots/plot_q1_convergence", dpi = 300)
+        plt.savefig("plots/plot_q1_convergence", dpi = 300)  if save else None
         plt.show()
 
     

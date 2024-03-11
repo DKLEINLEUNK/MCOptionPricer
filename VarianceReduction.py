@@ -48,10 +48,12 @@ class AsianOption(MonteCarlo):
             return self.arithmetic_pricing()
         elif method == 'geometric':
             return self.geometric_pricing()
+        elif method == 'analytical':
+            return self.analytical_pricing()
         elif method == 'control_variate':
             return self.control_variate_pricing()
         else:
-            raise ValueError('Invalid method. Please choose arithmetic, geometric or control_variate.')
+            raise ValueError('Invalid method. Please choose analytical, arithmetic, geometric or control_variate.')
     
 
     def arithmetic_pricing(self):
@@ -69,6 +71,20 @@ class AsianOption(MonteCarlo):
 
 
     def geometric_pricing(self):
+        if self.price_paths is None:
+            self.simulate_paths()
+        
+        S = self.price_paths 
+        G = np.exp(np.mean(np.log(S), axis=0))
+        G = np.maximum(G - self.K, 0)
+        C = np.exp(-self.r*self.T) * np.mean(G)
+
+        C_se = np.sqrt(np.exp(-self.r*self.T)*np.std(G) / np.sqrt(self.simulations))
+
+        return C, C_se
+
+
+    def analytical_pricing(self):
         '''
         Analytical expression for the price of an Asian option based on geometric averages.
         '''
@@ -91,7 +107,7 @@ class AsianOption(MonteCarlo):
         
         arithmetic_averages = np.mean(S, axis=0)
         geometric_averages = np.exp(np.mean(np.log(S), axis=0))
-        expected_geometric = self.geometric_pricing()
+        expected_geometric = self.analytical_pricing()
 
         # print(geometric_averages)
         # print(arithmetic_averages)
@@ -102,14 +118,20 @@ class AsianOption(MonteCarlo):
         C_arithmetic = np.exp(-self.r * self.T) * np.mean(payoff_arithmetic)
         C_geometric = np.exp(-self.r * self.T) * np.mean(payoff_geometric)
 
+        # print(C_arithmetic, C_geometric, expected_geometric)
+
         # find covariance and beta
         covariance = np.cov(payoff_arithmetic, payoff_geometric)
+
+        # print(covariance)
+
         beta = covariance[0, 1] / covariance[1, 1]
+
+        # print(beta)
+
         C = C_arithmetic - beta * (C_geometric - expected_geometric)
         
-        C_se = np.sqrt(np.std(C) / np.sqrt(self.simulations))
-        
-        return C, C_se
+        return C
     
 
 def plot_differences():
