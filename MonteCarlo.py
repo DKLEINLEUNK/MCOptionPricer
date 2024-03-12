@@ -111,8 +111,6 @@ class MonteCarlo:
         implemented with the Millstein scheme
         
         """
-    
-        # TODO Find the correct value for V0
 
         
         dt = self.T / self.time_steps
@@ -138,11 +136,10 @@ class MonteCarlo:
             V[t] = V[t-1] + self.kappa*(self.theta - np.maximum(V[t-1],0))*dt + self.epsilon*np.sqrt(np.maximum(V[t-1],0)*dt)*Zv[t-1] + (1/4)*(self.epsilon**2)*dt*((Zv[t-1]**2) - 1)
             
             #Update stock price (USED GEOMETRIC MODEL SO THAT IT IS CONSISTENT WITH THE OTHER GENERATE STOCK PATHS METHOD)
-            S[t] =  S[t-1] * np.exp((self.r - (1/2)*np.maximum(V[t],0))*dt + np.sqrt(np.maximum(V[t],0)*dt)*Zs[t-1])
+            S[t] =  S[t-1] * np.exp((self.r - (1/2)*np.maximum(V[t-1],0))*dt + np.sqrt(np.maximum(V[t],0)*dt)*Zs[t-1])
 
             progress_bar(t / self.time_steps) 
 
-            # TODO add a self.with_progress_bar attribute
         clear_progress_bar()
         
         self.price_paths = S
