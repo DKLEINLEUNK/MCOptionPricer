@@ -58,7 +58,7 @@ class Delta:
         self.params = params
 
 
-    def bump_and_revalue(self, bump_size=0.01, same_seed=False):
+    def bump_and_revalue(self, bump_size=0.2, same_seed=False):
         '''
         Estimate the hedge parameter in Monte Carlo using bump-and-revalue method.
         
@@ -67,34 +67,30 @@ class Delta:
         bump_size : float
             The size of the bump to the underlying price.
         '''
-        # TODO: look into using different seeds for bumped and unbumped estimates
-        # TODO: use multiple simulations instead of just one
-        # original_prices = []
-        # for _ in range(100):
-        # Option.simulate_paths()
-        # plt.plot(np.arange(Option.time_steps + 1), Option.price_paths[:,0])
-        # plt.show()
-
+        state = None
         if same_seed:
-            seed = np.random.randint(100_000)
-            np.random.seed(seed)
+            np.random.seed(None)
+            state = np.random.get_state()
 
         # Initialiate the option
-        price = self.Option.price_option()
+        price = self.Option.price_option(same_seed=same_seed, state=state)
 
         # Bump the price and revalue the option
         self.Option.S0 = self.Option.S0 + bump_size
     
         self.Option.price_paths = None  # reset price paths
-        bumped_price = self.Option.price_option()
-        
+        bumped_price = self.Option.price_option(same_seed=same_seed, state=state)
+ 
         delta = (bumped_price - price) / bump_size
 
+        # print(f'Delta: {delta}, Bumped price: {bumped_price}, Price: {price}')
+        
         return delta
     
 
     def path_wise(self):
-        epsilon = 0.1  # smoothing parameter TODO: make variable
+
+        epsilon = 10  # smoothing parameter TODO: make variable
 
         price = self.Option.price_option()
 
@@ -105,8 +101,14 @@ class Delta:
         r = self.Option.r
 
         # Apply smoothing to payoff
-        payoff = 1 / (1 - np.exp(-(S_T - K)/epsilon))
-        ratio = S_T /S_0
+
+        # payoff = (np.exp(-(r+epsilon)*T) * (S_T - K) + np.exp(-(r-epsilon)*T) * (K - S_T)) / (2*epsilon)
+        # payoff = np.exp(-(S_T - K)**2 / (2*epsilon**2)) / (np.sqrt(2*np.pi*epsilon**2))
+        # payoff = np.exp(-(S_T - K)/epsilon) / (1 + np.exp(-(S_T - K)/epsilon))
+
+        payoff = np.exp(-((S_T - K)/epsilon)) / (1 + np.exp(-((S_T - K)/epsilon)))**2  # <-- alex's derivation
+        ratio = S_T /(epsilon*S_0)
+
         delta_path = np.exp(-r * T) * payoff * ratio  #A list of deltas for each stock path
         delta = np.mean(delta_path) #The final estimate for delta
 
@@ -156,26 +158,28 @@ if __name__ == '__main__':
     #     'time_steps': 252
     # }
 
-    option = DigitalOption
-    model_params = {
-        'S0': 100,
-        'K' : 99,
-        'T': 1,
-        'r': 0.06,
-        'sigma': 0.2,
-        'simulations': 100_000,
-        'time_steps': 252
-    }
+    # option = DigitalOption
+    # model_params = {
+    #     'S0': 100,
+    #     'K' : 99,
+    #     'T': 1,
+    #     'r': 0.06,
+    #     'sigma': 0.2,
+    #     'simulations': 100_000,
+    #     'time_steps': 252
+    # }
 
-    delta = Delta(
-        option=option,
-        params=model_params
-    )
+    # delta = Delta(
+    #     option=option,
+    #     params=model_params
+    # )
     
-    path_wise_estimate = delta.path_wise()
-    print(path_wise_estimate)
-    likelihood_ratio_estimate = delta.likelihood_ratio()
-    print(likelihood_ratio_estimate)
+    # path_wise_estimate = delta.path_wise()
+    # print(f'Path wise estimate: {path_wise_estimate}')
+
+    # likelihood_ratio_estimate = delta.likelihood_ratio()
+    # print(f'Likelihood ratio estimate: {likelihood_ratio_estimate}')
+    
     # delta_bump_estimates = []
     # delta_pathwise_estimates = []
 
@@ -218,3 +222,21 @@ if __name__ == '__main__':
     # plt.hist(data, bins=20)
     # plt.axvline(anal, color='r', linestyle='--')
     # plt.show()
+
+    # randomly initialize the RNG from some platform-dependent source of entropy
+    np.random.seed(2)
+
+    # get the initial state of the RNG
+    st0 = np.random.get_state()
+    # print(st0)
+
+    # try 1: draw some random numbers
+    print(np.random.randint(0, 100, 10))
+    # [ 8 76 76 33 77 26  3  1 68 21]
+
+    # set the state back to what it was originally
+    # np.random.set_state(st0)
+
+    # try 2:
+    print(np.random.randint(0, 100, 10))
+

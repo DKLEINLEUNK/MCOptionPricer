@@ -17,6 +17,7 @@ expression to those obtained by using Monte-Carlo simulations.
 
 # 1.a: Asian option pricing based on geometric & arithmetic averages
 #-------------------------------------------------------------------
+import matplotlib.pyplot as plt
 import numpy as np
 
 from utils import phi
@@ -29,7 +30,7 @@ class AsianOption(MonteCarlo):
     A class for pricing Asian options using Monte Carlo simulation.
     '''
 
-    def price_option(self, method='arithmetic'):
+    def price_option(self, method='arithmetic', N=None):
         '''
         Description
         -----------
@@ -46,25 +47,62 @@ class AsianOption(MonteCarlo):
         if method == 'arithmetic':
             return self.arithmetic_pricing()
         elif method == 'geometric':
-            return self.geometric_pricing()
+            return self.geometric_pricing(N=N)
+        elif method == 'analytical':
+            return self.analytical_pricing()
         elif method == 'control_variate':
-            return self.control_variate_pricing()
+            return self.control_variate_pricing(N=N)
         else:
-            raise ValueError('Invalid method. Please choose arithmetic, geometric or control_variate.')
+            raise ValueError('Invalid method. Please choose analytical, arithmetic, geometric or control_variate.')
     
 
-    def arithmetic_pricing(self):
+    def arithmetic_pricing(self, as_array=False):
         if self.price_paths is None:
             self.simulate_paths()
 
         S = self.price_paths  # collection of stock prices, shape: (simulations, time_steps)
-        A = np.mean(S, axis=0)
-        A = np.maximum(A - self.K, 0)
-        C = np.exp(-self.r*self.T) * np.mean(A)
-        return C
+        S_T_bar = np.mean(S, axis=0)  # note: M = time_steps here
+
+        H = np.maximum(S_T_bar - self.K, 0)
+        
+        pi = np.exp(-self.r*self.T) * H
+
+        if as_array:
+            return pi
+
+        pi_se = (np.std(pi)) / np.sqrt(np.size(pi))
+
+        return np.mean(pi), pi_se
 
 
-    def geometric_pricing(self):
+    def geometric_pricing(self, N, as_array=False):
+        if self.price_paths is None:
+            self.simulate_paths()
+
+        S = self.price_paths
+
+        # select indices for the (iT/N) range
+        indices = np.arange(0, self.time_steps, self.time_steps//N)
+        S = S[indices]
+        
+        A_N_tilda = np.prod(S, axis=0)**(1/(N+1))
+        
+        # note for future: we only need to calculate stock prices of the (iT/N) range
+        # print(A_N_tilda)
+
+        H = np.maximum(A_N_tilda - self.K, 0)
+
+        pi = np.exp(-self.r*self.T) * H
+
+        if as_array:
+            return pi
+
+        pi_se = np.std(pi) / np.sqrt(np.size(pi))
+
+        return np.mean(pi), pi_se
+
+
+    def analytical_pricing(self):
         '''
         Analytical expression for the price of an Asian option based on geometric averages.
         '''
@@ -72,62 +110,59 @@ class AsianOption(MonteCarlo):
 
         sigma_tilda = self.sigma * np.sqrt((2*N + 1) / (6*(N + 1)))
         r_tilda = ((self.r - self.sigma**2/2) + (sigma_tilda**2)) / 2
+        
         d1_tilda = (np.log(self.S0/self.K) + (r_tilda + sigma_tilda**2/2)*self.T) / np.sqrt(self.T*sigma_tilda)
         d2_tilda = (np.log(self.S0/self.K) - (r_tilda + sigma_tilda**2/2)*self.T) / np.sqrt(self.T*sigma_tilda)
+        
         # C = np.exp((r_tilda-self.r)*self.T) * self.S0 * phi(d1_tilda) - self.K * phi(d2_tilda)
-        C = np.exp(-self.r*self.T) * self.S0 * np.exp(r_tilda*self.T) * phi(d1_tilda) - self.K * phi(d2_tilda)
-        return C
+
+        pi = np.exp(-self.r*self.T) * self.S0 * np.exp(r_tilda*self.T) * phi(d1_tilda) - self.K * phi(d2_tilda)
+        
+        return pi
 
 
-    def control_variate_pricing(self):
+    def control_variate_pricing(self, N, as_array=False):
         if self.price_paths is None:
             self.simulate_paths()
         
         S = self.price_paths  # collection of stock prices, shape: (simulations, time_steps)
+
+        pi_ari = self.arithmetic_pricing(as_array=True)
+        pi_geo = self.geometric_pricing(N, as_array=True)
+        pi_geo_exp = self.analytical_pricing()
+
+        # C_arithmetic = np.exp(-self.r * self.T) * np.mean(payoff_arithmetic)
+        # C_geometric = np.exp(-self.r * self.T) * np.mean(payoff_geometric)
+        # print(C_arithmetic, C_geometric, expected_geometric)
         
-        arithmetic_averages = np.mean(S, axis=0)
-        geometric_averages = np.exp(np.mean(np.log(S), axis=0))
-        expected_geometric = self.geometric_pricing()
-
-        # print(geometric_averages)
-        # print(arithmetic_averages)
-
-        payoff_arithmetic = np.maximum(arithmetic_averages - self.K, 0)
-        payoff_geometric = np.maximum(geometric_averages - self.K, 0)
-        
-        C_arithmetic = np.exp(-self.r * self.T) * np.mean(payoff_arithmetic)
-        C_geometric = np.exp(-self.r * self.T) * np.mean(payoff_geometric)
-
         # find covariance and beta
-        covariance = np.cov(payoff_arithmetic, payoff_geometric)
-        beta = covariance[0, 1] / covariance[1, 1]
-        C = C_arithmetic - beta * (C_geometric - expected_geometric)
-        return C
+        cov = np.cov(pi_ari, pi_geo)
+        beta = -cov[0, 1] / cov[1, 1]
+
+        # print(beta)
+
+        pi_cv = pi_ari + beta * (pi_geo - pi_geo_exp)
+        
+        if as_array:
+            return pi_cv
+        
+        pi_cv_se = np.std(pi_cv) / np.sqrt(np.size(pi_cv))
+        
+        return np.mean(pi_cv), pi_cv_se
     
-
-
-def main():
-    
-    arithmetic, geometric, both = [], [], []
-    for _ in range(100):
-        asian_option = AsianOption(
-            S0=100,
-            K=99,
-            T=1,
-            r=0.06,
-            sigma=0.20,
-            simulations=100_000,
-            time_steps=252
-        )
-        arithmetic.append(asian_option.price_option(method='arithmetic'))
-        geometric.append(asian_option.price_option(method='geometric'))
-        both.append(asian_option.price_option(method='control_variate'))
-
-    print('Variances')
-    print('---------')
-    print(f'Arithmetic: {np.var(arithmetic)}')
-    print(f'Geometric: {np.var(geometric)}')
-    print(f'Control Variate: {np.var(both)}')
 
 if __name__ == '__main__':
-    main()
+    asian_option = AsianOption(
+        S0=100,
+        K=99,
+        T=1,
+        r=0.06,
+        sigma=0.20,
+        simulations=100_000,
+        time_steps=252
+    )
+
+    print(asian_option.price_option(method='analytical'))
+    print(asian_option.price_option(method='geometric', N=25))
+    print(asian_option.price_option(method='control_variate', N=25))
+    print(asian_option.price_option(method='arithmetic'))
