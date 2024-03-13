@@ -99,7 +99,7 @@ class Convergence:
         sigma=0.2
     )
         
-        plt.figure(figsize=(6, 5))
+        plt.figure(figsize=(5, 4))
             
         plt.plot(num_of_trials, price_estimates, label = "MC Price", color = "blue")
         plt.plot(num_of_trials,lower_95_CI_values, linestyle='--', label = "Lower 95% CI", color = "black")
@@ -113,7 +113,7 @@ class Convergence:
         plt.yticks(fontsize=12)
         plt.xticks(fontsize=12)
         plt.legend(fontsize=12)
-        plt.savefig("plots/plot_q1_convergence", dpi = 300)  if save else None
+        plt.savefig("plots/plot_q1_convergence",bbox_inches='tight', dpi = 300)  if save else None
         plt.show()
 
     
@@ -143,14 +143,14 @@ class Convergence:
             put.compute_RMSE()
             RMSEs.append(put.RMSE)
 
-        plt.figure(figsize=(6, 5))
+        plt.figure(figsize=(5, 4))
         plt.plot(num_of_trials, RMSEs)
-        plt.xlabel("Number of trials")
-        plt.ylabel("Standard error")
+        plt.xlabel("Number of trials", fontsize = 14)
+        plt.ylabel("Standard error", fontsize = 14)
         plt.yticks(fontsize=12)
         plt.xticks(fontsize=12)
         plt.legend(fontsize=12)
-        plt.savefig("plots/plot_q1_standard_error", dpi = 300)
+        plt.savefig("plots/plot_q1_standard_error",bbox_inches='tight', dpi = 300)
         plt.show()
 
 
@@ -201,10 +201,11 @@ class Convergence:
         plt.figure(figsize=(5, 4))
         plt.plot(Ks, mc_prices)
         plt.xlabel("K",fontsize=14)
-        plt.ylabel("Prices", fontsize=14)
+        plt.ylabel("Price", fontsize=14)
         plt.yticks(fontsize=12)
         plt.xticks(fontsize=12)
         plt.legend(fontsize=12)
+        plt.savefig("plots/mc-strike-sensitivity",bbox_inches='tight', dpi = 300)
         plt.show()
 
         #Difference between MC price and BS price for different K's
@@ -215,6 +216,7 @@ class Convergence:
         plt.yticks(fontsize=12)
         plt.xticks(fontsize=12)
         plt.legend(fontsize=12)
+        plt.savefig("plots/bs-strike-sensitivity", bbox_inches='tight', dpi = 300)
         plt.show()
 
 
@@ -265,10 +267,11 @@ class Convergence:
         plt.figure(figsize=(5, 4))
         plt.plot(sigmas, mc_prices)
         plt.xlabel("$\\sigma$",fontsize=14)
-        plt.ylabel("Prices", fontsize=14)
+        plt.ylabel("Price", fontsize=14)
         plt.yticks(fontsize=12)
         plt.xticks(fontsize=12)
         plt.legend(fontsize=12)
+        plt.savefig("plots/mc-sigma-sensitivity", bbox_inches='tight', dpi = 300)
         plt.show()
 
         #Difference between MC price and BS price for different sigmas
@@ -279,6 +282,7 @@ class Convergence:
         plt.yticks(fontsize=12)
         plt.xticks(fontsize=12)
         plt.legend(fontsize=12)
+        plt.savefig("plots/bs-sigma-sensitivity",bbox_inches='tight', dpi = 300)
         plt.show()
 
 

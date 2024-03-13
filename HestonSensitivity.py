@@ -25,7 +25,7 @@ class sensitivityAnalysis:
         
         """
 
-        barriers = np.arange(100,310,10)
+        barriers = np.arange(100,510,10)
         prices = []
 
         for barrier in barriers:
@@ -34,7 +34,7 @@ class sensitivityAnalysis:
             S0=100,
             K=100,
             T=1,
-            r=0.06,
+            r=0.05,
             sigma=0.2,
             simulations=10_000,
             time_steps=250,
@@ -50,12 +50,13 @@ class sensitivityAnalysis:
             prices.append(price)
         
         plt.figure(figsize=(5, 4))
-        plt.plot(barriers, prices)
-        plt.xlabel("Barrier")
-        plt.ylabel("Price")
+        plt.plot(barriers, prices, color = "red")
+        plt.xlabel("$B$", fontsize=14)
+        plt.ylabel("Price", fontsize=14)
         plt.yticks(fontsize=12)
         plt.xticks(fontsize=12)
         plt.legend(fontsize=12)
+        plt.savefig("plots/heston-barrier-sensitivity", bbox_inches='tight', dpi = 300)
         plt.show()
         
 
@@ -78,7 +79,7 @@ class sensitivityAnalysis:
             S0=100,
             K=100,
             T=1,
-            r=0.06,
+            r=0.05,
             sigma=0.2,
             simulations=10_000,
             time_steps=250,
@@ -94,13 +95,14 @@ class sensitivityAnalysis:
             prices.append(price)
         
         plt.figure(figsize=(5, 4))
-        plt.plot(rhos, prices)
-        plt.axvline(x=0, color='r', linestyle=':')
-        plt.xlabel("$\\rho$")
-        plt.ylabel("Prices")
+        plt.plot(rhos, prices, color = "red")
+        plt.axvline(x=0, color='blue', linestyle=':')
+        plt.xlabel("$\\rho$", fontsize = 14)
+        plt.ylabel("Price", fontsize = 14)
         plt.yticks(fontsize=12)
         plt.xticks(fontsize=12)
         plt.legend(fontsize=12)
+        plt.savefig("plots/heston-correlation-sensitivity",bbox_inches='tight',dpi = 300)
         plt.show()
 
         
@@ -123,7 +125,7 @@ class sensitivityAnalysis:
             S0=100,
             K=100,
             T=1,
-            r=0.06,
+            r=0.05,
             sigma=0.2,
             simulations=10_000,
             time_steps=250,
@@ -131,7 +133,7 @@ class sensitivityAnalysis:
             theta = 0.04,
             kappa = 2, 
             epsilon = epsilon,
-            rho =  -0.7, #Vary rho's
+            rho =  -0.7, 
             V0 = 0.20 
         )
             
@@ -139,12 +141,13 @@ class sensitivityAnalysis:
             prices.append(price)
         
         plt.figure(figsize=(5, 4))
-        plt.plot(epsilons, prices)        
-        plt.xlabel("$\\epsilon$")
-        plt.ylabel("Prices")
+        plt.plot(epsilons, prices, color = "red")        
+        plt.xlabel("$\\epsilon$", fontsize = 14)
+        plt.ylabel("Price", fontsize = 14)
         plt.yticks(fontsize=12)
         plt.xticks(fontsize=12)
         plt.legend(fontsize=12)
+        plt.savefig("plots/heston-vol-of-vol-sensitivity",bbox_inches='tight', dpi = 300)
         plt.show()
 
         
