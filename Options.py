@@ -1,6 +1,8 @@
 import numpy as np
 from MonteCarlo import MonteCarlo
 import matplotlib.pyplot as plt
+from matplotlib.gridspec import GridSpec
+from scipy.stats import lognorm
 
 
 class EUPut(MonteCarlo):
@@ -28,16 +30,32 @@ class EUPut(MonteCarlo):
         num_rows = self.price_paths.shape[0]
         x_values = np.arange(num_rows)
 
-        plt.figure(figsize=(6, 5))
+        # plt.figure(figsize=(6, 5))
+        fig = plt.figure(figsize=(7, 5))
+        gs = GridSpec(1, 2, width_ratios=[5, 1], wspace=0.05)
 
-        for i in range(50):
-            plt.plot(x_values, self.price_paths[:, i])
 
-        plt.xlabel("$t$", fontsize=14)
-        plt.ylabel("$S_t$", fontsize=14)
-        plt.yticks(fontsize=12)
+        ax1 = plt.subplot(gs[0])
+        for i in range(2_000):
+            # plt.plot(x_values, self.price_paths[:, i])
+            ax1.plot(x_values, self.price_paths[:, i], linewidth=1, alpha=0.25)
+        ax1.set_xlabel("Time ($t$)", fontsize=14)
+        ax1.set_ylabel("Stock Price ($S_t)$", fontsize=14)
+
+        # final_prices = self.price_paths[-1, :]
+        # plt.hist(final_prices, bins=30, orientation='horizontal', alpha=0.6, density=True)
+        ax2 = plt.subplot(gs[1], sharey=ax1)
+        final_prices = self.price_paths[-1, :]
+        ax2.hist(final_prices, bins=30, orientation='horizontal', color='orange', alpha=0.7, density=True)
+        
+        plt.setp(ax2.get_xticklabels(), visible=False)
+        plt.setp(ax2.get_yticklabels(), visible=False)
+
+        plt.setp(ax1.get_yticklabels(), fontsize=12)
+        plt.setp(ax1.get_xticklabels(), fontsize=12)
+        
         plt.xticks(fontsize=12)
-        plt.savefig("plots/plot_q1_stock_paths", dpi = 300)  if save else None
+        plt.savefig("plots/plot_q1_stock_paths", dpi = 400)  if save else None
         plt.show()
 
 
@@ -132,9 +150,9 @@ class DigitalOption(MonteCarlo):
     A class for pricing
     '''
     
-    def price_option(self):
+    def price_option(self, same_seed=False, state=None):
         if self.price_paths is None:
-            self.simulate_paths()
+            self.simulate_paths(same_seed=same_seed, state=state)
         
         payoff = self.price_paths[-1] >= self.K
         price = np.exp(-self.r * self.T) * np.mean(payoff)
@@ -144,8 +162,8 @@ class DigitalOption(MonteCarlo):
 
 if __name__ == '__main__':
 
-    #TESTING BARRIER LOGIC 
-    #-----------------------------
+    # TESTING BARRIER LOGIC 
+    # -----------------------------
 
     # mat = np.array([[1,2,1],
     #                [5,0,1],

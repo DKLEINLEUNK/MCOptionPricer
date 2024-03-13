@@ -90,7 +90,7 @@ class Delta:
 
     def path_wise(self):
 
-        epsilon = 10  # smoothing parameter TODO: make variable
+        epsilon = 1  # smoothing parameter TODO: make variable
 
         price = self.Option.price_option()
 
@@ -135,7 +135,31 @@ class Delta:
         delta = np.mean(np.exp(-r*T) * payoff * (Y)) # note: this was changed from the assignment
         
         return delta
+    
 
+    def likelihood_ratio_smooth(self):
+        '''
+        Formulas
+        --------
+        Y = (log(S_T/S_0) - (r - sigma^2/2)T) / (S_0 * sigma^2 * sqrt(T))
+        delta = E[e^(-rT) * 1{S_T>=K} * Y / (S_0 * sigma * sqrt(T))]
+        '''
+        price = self.Option.price_option()
+
+        S_T = self.Option.price_paths[-1]
+        S_0 = self.Option.price_paths[0]
+        K = self.Option.K
+        T = self.Option.T
+        r = self.Option.r
+        sigma = self.Option.sigma
+
+        Y = (np.log(S_T/S_0) - (r - sigma**2/2)*T) / (S_0 * sigma**2 * T)  # note: this is a vector
+        payoff = np.exp(-((S_T - K)/1)) / (1 + np.exp(-((S_T - K)/1)))**2  # <-- alex's derivation
+        ratio = S_T /(1*S_0)
+        delta_path = np.exp(-r * T) * payoff * ratio  #A list of deltas for each stock path
+        delta = np.mean(delta_path) # note: this was changed from the assignment
+        
+        return delta
 
 
     def export_deltas(self):

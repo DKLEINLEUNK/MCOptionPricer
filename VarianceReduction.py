@@ -162,7 +162,9 @@ if __name__ == '__main__':
         time_steps=252
     )
 
-    print(asian_option.price_option(method='analytical'))
+    # print(asian_option.price_option(method='analytical'))
     print(asian_option.price_option(method='geometric', N=25))
     print(asian_option.price_option(method='control_variate', N=25))
-    print(asian_option.price_option(method='arithmetic'))
+    # print(asian_option.price_option(method='arithmetic'))
+
+
